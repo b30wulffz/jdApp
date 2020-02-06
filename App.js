@@ -1,7 +1,7 @@
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
-// import HomePage from './screens/HomePage';
+import {View, PermissionsAndroid, StyleSheet} from 'react-native';
 import MapView from 'react-native-maps';
+import Geolocation from 'react-native-geolocation-service';
 
 export default class App extends React.Component {
   constructor() {
@@ -16,37 +16,60 @@ export default class App extends React.Component {
     };
   }
 
-  // componentDidMount() {
-  //   navigator.geolocation.getCurrentPosition(position => {
-  //     console.log(position.coords);
-  //   });
-  // }
-
   componentDidMount() {
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        var lat = parseFloat(position.coords.latitude);
-        var long = parseFloat(position.coords.longitude);
-
-        var initialRegion = {
-          latitude: lat,
-          longitude: long,
-          latitudeDelta: 0,
-          longitudeDelta: 0,
-        };
-
-        this.setState({currLocation: initialRegion});
-      },
-      error => alert(JSON.stringify(error)),
-      {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000},
-    );
+    let per = new Promise(async res => {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Access Required',
+            message: 'This App needs to access your location',
+          },
+        );
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          res(true);
+        } else {
+          alert('Permission Denied');
+          res(false);
+        }
+      } catch (err) {}
+    });
+    per.then(is => {
+      if (is) {
+        console.log('hello');
+        Geolocation.getCurrentPosition(
+          position => {
+            console.log(position);
+            this.setState({
+              currLocation: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+              },
+            });
+          },
+          () => {},
+          {
+            enableHighAccuracy: true,
+            timeout: 600000,
+            maximumAge: 60000,
+            forceRequestLocation: true,
+          },
+        );
+      }
+    });
   }
 
   render() {
     return (
       <View style={styles.mapFrame}>
-        {/* <Text>Hello, World!</Text> */}
-        <MapView style={styles.map} initialRegion={this.state.currLocation} />
+        <MapView
+          style={styles.map}
+          region={this.state.currLocation}
+          showsCompass
+          showsUserLocation
+        />
       </View>
     );
   }
@@ -58,7 +81,7 @@ const styles = StyleSheet.create({
   },
   mapFrame: {
     width: '100%',
-    height: '50%',
+    height: '100%',
   },
 });
 

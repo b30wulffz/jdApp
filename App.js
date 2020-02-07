@@ -8,6 +8,7 @@ import {
   CheckBox,
   Modal,
   TouchableHighlight,
+  TextInput,
 } from 'react-native';
 import MapView, {Marker, Callout} from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
@@ -101,26 +102,37 @@ export default class App extends React.Component {
       mLong: -122.4324,
       values: [],
       dataVisible: false,
+      updateData: false,
+      updateLat: 0,
+      updateLot: 0,
     };
     this.setup = this.setup.bind(this);
-    this.updateRef = this.updateRef.bind(this);
     this.setDataModal = this.setDataModal.bind(this);
+    this.setUpdate = this.setUpdate.bind(this);
   }
 
   setup({nativeEvent: {coordinate}}) {
-    let data = getListArray(
-      this.state.atm,
-      this.state.banks,
-      coordinate.latitude,
-      coordinate.longitude,
-      this.region.latitudeDelta,
-      this.region.longitudeDelta,
-    );
-    this.setState({
-      values: data,
-      mLat: coordinate.latitude,
-      mLong: coordinate.longitude,
-    });
+    if (this.state.updateData) {
+      this.setState({
+        dataVisible: true,
+        updateLat: coordinate.latitude,
+        updateLot: coordinate.longitude,
+      });
+    } else {
+      let data = getListArray(
+        this.state.atm,
+        this.state.banks,
+        coordinate.latitude,
+        coordinate.longitude,
+        this.region.latitudeDelta,
+        this.region.longitudeDelta,
+      );
+      this.setState({
+        values: data,
+        mLat: coordinate.latitude,
+        mLong: coordinate.longitude,
+      });
+    }
   }
 
   componentDidMount() {
@@ -167,12 +179,12 @@ export default class App extends React.Component {
     });
   }
 
-  updateRef(re) {
-    this.cref = re;
-  }
-
   setDataModal() {
     this.setState({dataVisible: !this.state.dataVisible});
+  }
+
+  setUpdate() {
+    this.setState({updateData: !this.state.updateData});
   }
 
   render() {
@@ -201,31 +213,134 @@ export default class App extends React.Component {
             on={this.setDataModal}></CMarker>
         </MapView>
         <Modal visible={this.state.dataVisible} transparent={true}>
-          <View style={styles.modalBack}>
-            <DataView data={this.state.values} full={true}></DataView>
-            <TouchableHighlight
-              onPress={this.setDataModal}
-              style={{
-                marginTop: 20,
-                height: 40,
-                width: 70,
-                alignSelf: 'center',
-                backgroundColor: '#ffffff',
-                borderRadius: 10,
-              }}>
-              <Text
+          {this.state.updateData ? (
+            <View style={styles.modalBack}>
+              <View
                 style={{
-                  fontWeight: '800',
-                  fontSize: 20,
-                  height: '100%',
-                  width: '100%',
-                  textAlign: 'center',
-                  textAlignVertical: 'center',
+                  width: '90%',
+                  backgroundColor: '#ffffff',
+                  alignSelf: 'center',
                 }}>
-                Close
-              </Text>
-            </TouchableHighlight>
-          </View>
+                <View
+                  style={{
+                    width: '90%',
+                    alignSelf: 'center',
+                    display: 'flex',
+                    direction: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingVertical: 3,
+                  }}>
+                  <Text style={{fontSize: 22}}>Name</Text>
+                  <TextInput
+                    placeholder={'Name'}
+                    style={{
+                      width: '90%',
+                      color: '#000000',
+                      fontSize: 20,
+                      borderBottomWidth: 1,
+                    }}></TextInput>
+                </View>
+                <View
+                  style={{
+                    width: '90%',
+                    alignSelf: 'center',
+                    display: 'flex',
+                    direction: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingVertical: 3,
+                  }}>
+                  <Text style={{fontSize: 22}}>Timings</Text>
+                  <TextInput
+                    placeholder={'Timings'}
+                    style={{
+                      width: '90%',
+                      color: '#000000',
+                      fontSize: 20,
+                      borderBottomWidth: 1,
+                    }}></TextInput>
+                </View>
+                <View
+                  style={{
+                    width: '90%',
+                    alignSelf: 'center',
+                    display: 'flex',
+                    direction: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingVertical: 3,
+                  }}>
+                  <Text style={{fontSize: 22}}>Address</Text>
+                  <TextInput
+                    placeholder={'Address'}
+                    style={{
+                      width: '90%',
+                      color: '#000000',
+                      fontSize: 20,
+                      borderBottomWidth: 1,
+                    }}></TextInput>
+                </View>
+                <Text
+                  style={{fontSize: 22, width: '100%', textAlign: 'center'}}>
+                  Latitude: {this.state.updateLat}
+                </Text>
+                <Text
+                  style={{fontSize: 22, width: '100%', textAlign: 'center'}}>
+                  Longitude: {this.state.updateLot}
+                </Text>
+                <TouchableHighlight
+                  onPress={() => {
+                    this.setState({updateData: false, dataVisible: false});
+                  }}
+                  style={{
+                    height: 40,
+                    width: 80,
+                    alignSelf: 'center',
+                    backgroundColor: '#000080',
+                  }}>
+                  <Text
+                    style={{
+                      color: '#ffffff',
+                      fontWeight: '800',
+                      fontSize: 24,
+                      height: '100%',
+                      width: '100%',
+                      textAlign: 'center',
+                      textAlignVertical: 'center',
+                    }}>
+                    Done
+                  </Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.modalBack}>
+              <DataView data={this.state.values} full={true}></DataView>
+              <TouchableHighlight
+                onPress={this.setDataModal}
+                style={{
+                  marginTop: 20,
+                  height: 40,
+                  width: 70,
+                  alignSelf: 'center',
+                  backgroundColor: '#ffffff',
+                  borderRadius: 10,
+                }}>
+                <Text
+                  style={{
+                    fontWeight: '800',
+                    fontSize: 20,
+                    height: '100%',
+                    width: '100%',
+                    textAlign: 'center',
+                    textAlignVertical: 'center',
+                  }}>
+                  Close
+                </Text>
+              </TouchableHighlight>
+            </View>
+          )}
         </Modal>
         <View style={styles.check}>
           <View style={styles.checkbox}>
@@ -245,6 +360,31 @@ export default class App extends React.Component {
             <Text style={styles.checkText}>Banks</Text>
           </View>
         </View>
+        <TouchableHighlight
+          onPress={this.setUpdate}
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            right: 10,
+            height: 60,
+            width: 60,
+            alignSelf: 'center',
+            backgroundColor: this.state.updateData ? '#800000' : '#000080',
+            borderRadius: 30,
+          }}>
+          <Text
+            style={{
+              color: '#ffffff',
+              fontWeight: '800',
+              fontSize: 28,
+              height: '100%',
+              width: '100%',
+              textAlign: 'center',
+              textAlignVertical: 'center',
+            }}>
+            +
+          </Text>
+        </TouchableHighlight>
       </View>
     );
   }

@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import MapView, {Marker, Callout} from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
-import DataView from './dataview';
+import CMarker from './Marker';
 
 const Data = require('./data.json');
 
@@ -77,7 +77,6 @@ function getListArray(atm, bank, lat, lot, latDel, lotDel) {
       }
     }
   }
-  console.log(ans);
   return ans;
 }
 
@@ -97,30 +96,26 @@ export default class App extends React.Component {
       banks: this.banks,
       mLat: 37.78825,
       mLong: -122.4324,
-      data: [],
+      values: [],
     };
     this.setup = this.setup.bind(this);
+    this.updateRef = this.updateRef.bind(this);
   }
 
   setup({nativeEvent: {coordinate}}) {
     let data = getListArray(
       this.state.atm,
-      this.state.bank,
+      this.state.banks,
       coordinate.latitude,
       coordinate.longitude,
       this.region.latitudeDelta,
       this.region.longitudeDelta,
     );
     this.setState({
-      data: data,
+      values: data,
       mLat: coordinate.latitude,
       mLong: coordinate.longitude,
     });
-    if (data.length <= 0) {
-      this.cref.hideCallout();
-    } else {
-      this.cref.showCallout();
-    }
   }
 
   componentDidMount() {
@@ -148,10 +143,9 @@ export default class App extends React.Component {
           position => {
             this.ref.animateToRegion(
               {
+                ...this.region,
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
-                latitudeDelta: 0.0001922,
-                longitudeDelta: 0.0001421,
               },
               1000,
             );
@@ -166,6 +160,10 @@ export default class App extends React.Component {
         );
       }
     });
+  }
+
+  updateRef(re) {
+    this.cref = re;
   }
 
   render() {
@@ -188,21 +186,10 @@ export default class App extends React.Component {
           onMarkerPress={this.setup}>
           {this.state.banks && Data.bank.map(bankMarker)}
           {this.state.atm && Data.atm.map(atmMarker)}
-          <Marker
-            ref={ref => {
-              this.cref = ref;
-            }}
-            coordinate={{
-              latitude: this.state.mLat,
-              longitude: this.state.mLong,
-            }}>
-            <View>
-              <Text> </Text>
-            </View>
-            <Callout style={styles.data}>
-              <DataView data={this.state.data}></DataView>
-            </Callout>
-          </Marker>
+          <CMarker
+            mLong={this.state.mLong}
+            mLat={this.state.mLat}
+            data={this.state.values}></CMarker>
         </MapView>
         <View style={styles.check}>
           <View style={styles.checkbox}>
@@ -258,9 +245,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#ffffff',
-  },
-  data: {
-    height: 200,
-    width: 300,
   },
 });

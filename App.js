@@ -1,19 +1,126 @@
 import React from 'react';
-import {View, PermissionsAndroid, StyleSheet} from 'react-native';
-import MapView from 'react-native-maps';
+import {
+  View,
+  PermissionsAndroid,
+  StyleSheet,
+  Text,
+  BackHandler,
+  CheckBox,
+} from 'react-native';
+import MapView, {Marker, Callout} from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
+import DataView from './dataview';
+
+const Data = require('./data.json');
+
+const bankMarker = (data, index) => {
+  const {latitude, longitude} = data;
+  return (
+    <Marker
+      coordinate={{latitude, longitude}}
+      icon={require('./images/bank.png')}
+      key={'bank' + index}></Marker>
+  );
+};
+
+const atmMarker = (data, index) => {
+  const {latitude, longitude} = data;
+  return (
+    <Marker
+      coordinate={{latitude, longitude}}
+      icon={require('./images/atm.png')}
+      key={'atm' + index}></Marker>
+  );
+};
+
+function getPgArray(lat, lot, latDel, lotDel) {
+  let minLat = lat - latDel * 0.04;
+  let maxLat = lat + latDel * 0.04;
+  let maxLot = lot + lotDel * 0.06;
+  let minLot = lot - lotDel * 0.06;
+  let a = [
+    {latitude: minLat, longitude: minLot},
+    {latitude: minLat, longitude: maxLot},
+    {latitude: maxLat, longitude: maxLot},
+    {latitude: maxLat, longitude: minLot},
+  ];
+  return a;
+}
+
+function getListArray(atm, bank, lat, lot, latDel, lotDel) {
+  let ans = [];
+  let minLat = lat - latDel * 0.045;
+  let maxLat = lat + latDel * 0.045;
+  let maxLot = lot + lotDel * 0.07;
+  let minLot = lot - lotDel * 0.07;
+  if (atm) {
+    for (let i = 0; i < Data.atm.length; i++) {
+      if (
+        Data.atm[i].latitude >= minLat &&
+        Data.atm[i].latitude <= maxLat &&
+        Data.atm[i].longitude >= minLot &&
+        Data.atm[i].longitude <= maxLot
+      ) {
+        ans.push(Data.atm[i]);
+      }
+    }
+  }
+  if (bank) {
+    for (let i = 0; i < Data.bank.length; i++) {
+      if (
+        Data.bank[i].latitude >= minLat &&
+        Data.bank[i].latitude <= maxLat &&
+        Data.bank[i].longitude >= minLot &&
+        Data.bank[i].longitude <= maxLot
+      ) {
+        ans.push(Data.bank[i]);
+      }
+    }
+  }
+  console.log(ans);
+  return ans;
+}
 
 export default class App extends React.Component {
   constructor() {
     super();
-    this.state = {
-      currLocation: {
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      },
+    this.region = {
+      latitude: 37.78825,
+      longitude: -122.4324,
+      latitudeDelta: 0.0001922,
+      longitudeDelta: 0.0001421,
     };
+    this.cref = undefined;
+    this.ref = undefined;
+    this.state = {
+      atm: this.atm,
+      banks: this.banks,
+      mLat: 37.78825,
+      mLong: -122.4324,
+      data: [],
+    };
+    this.setup = this.setup.bind(this);
+  }
+
+  setup({nativeEvent: {coordinate}}) {
+    let data = getListArray(
+      this.state.atm,
+      this.state.bank,
+      coordinate.latitude,
+      coordinate.longitude,
+      this.region.latitudeDelta,
+      this.region.longitudeDelta,
+    );
+    this.setState({
+      data: data,
+      mLat: coordinate.latitude,
+      mLong: coordinate.longitude,
+    });
+    if (data.length <= 0) {
+      this.cref.hideCallout();
+    } else {
+      this.cref.showCallout();
+    }
   }
 
   componentDidMount() {
@@ -30,24 +137,24 @@ export default class App extends React.Component {
           res(true);
         } else {
           alert('Permission Denied');
+          BackHandler.exitApp();
           res(false);
         }
       } catch (err) {}
     });
     per.then(is => {
       if (is) {
-        console.log('hello');
         Geolocation.getCurrentPosition(
           position => {
-            console.log(position);
-            this.setState({
-              currLocation: {
+            this.ref.animateToRegion(
+              {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
+                latitudeDelta: 0.0001922,
+                longitudeDelta: 0.0001421,
               },
-            });
+              1000,
+            );
           },
           () => {},
           {
@@ -65,11 +172,56 @@ export default class App extends React.Component {
     return (
       <View style={styles.mapFrame}>
         <MapView
+          ref={ref => {
+            this.ref = ref;
+          }}
           style={styles.map}
-          region={this.state.currLocation}
-          showsCompass
-          showsUserLocation
-        />
+          initialRegion={this.region}
+          maxZoomLevel={14}
+          minZoomLevel={7}
+          showsUserLocation={true}
+          showsMyLocationButton={true}
+          onRegionChangeComplete={region => {
+            this.region = region;
+          }}
+          onPress={this.setup}
+          onMarkerPress={this.setup}>
+          {this.state.banks && Data.bank.map(bankMarker)}
+          {this.state.atm && Data.atm.map(atmMarker)}
+          <Marker
+            ref={ref => {
+              this.cref = ref;
+            }}
+            coordinate={{
+              latitude: this.state.mLat,
+              longitude: this.state.mLong,
+            }}>
+            <View>
+              <Text> </Text>
+            </View>
+            <Callout style={styles.data}>
+              <DataView data={this.state.data}></DataView>
+            </Callout>
+          </Marker>
+        </MapView>
+        <View style={styles.check}>
+          <View style={styles.checkbox}>
+            <CheckBox
+              onValueChange={val => {
+                this.setState({atm: val});
+              }}
+              value={this.state.atm}></CheckBox>
+            <Text style={styles.checkText}>ATMs</Text>
+          </View>
+          <View style={styles.checkbox}>
+            <CheckBox
+              onValueChange={val => {
+                this.setState({banks: val});
+              }}
+              value={this.state.banks}></CheckBox>
+            <Text style={styles.checkText}>Banks</Text>
+          </View>
+        </View>
       </View>
     );
   }
@@ -83,63 +235,32 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  check: {
+    position: 'absolute',
+    bottom: 20,
+    left: 20,
+    height: 'auto',
+    width: 140,
+    backgroundColor: '#000080',
+    display: 'flex',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+  checkbox: {
+    marginVertical: 5,
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
+    alignItems: 'center',
+  },
+  checkText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  data: {
+    height: 200,
+    width: 300,
+  },
 });
-
-// import React, {Component} from 'react';
-// import {Text, StyleSheet} from 'react-native';
-// import MapView from 'react-native-maps';
-// //import ClusteredMapView from 'react-native-maps-super-cluster';
-// // import image from './images/flag-pink.png';
-
-// export default class App extends Component<{}> {
-//   render() {
-//     const coordinates = [];
-
-//     coordinates.push({
-//       key: 0,
-//       location: {
-//         longitude: -70.23,
-//         latitude: -33.23,
-//       },
-//     });
-
-//     for (let i = 1; i < 100; i++) {
-//       const location = {
-//         longitude:
-//           coordinates[i - 1].location.longitude +
-//           Math.random() * (i % 2 === 0 ? -1 : 1),
-//         latitude:
-//           coordinates[i - 1].location.latitude +
-//           Math.random() * (i % 2 === 0 ? -1 : 1),
-//       };
-
-//       coordinates.push({key: i, location});
-//     }
-
-//     return (
-//       <MapView
-//         renderMarker={renderMarker}
-//         initialRegion={{
-//           longitude: -70.23,
-//           latitude: -33.23,
-//           latitudeDelta: 9.22,
-//           longitudeDelta: 4.21,
-//         }}
-//         style={StyleSheet.absoluteFillObject}>
-//         {coordinates.map(({key, location}) => (
-//           <MapView.Marker key={key} coordinate={location} />
-//         ))}
-//       </MapView>
-//     );
-//   }
-// }
-
-// function renderMarker({location}) {
-//   return (
-//     <MapView.Marker coordinate={location}>
-//       <MapView.Callout>
-//         <Text>BiG BiG Callout</Text>
-//       </MapView.Callout>
-//     </MapView.Marker>
-//   );
-// }

@@ -3,7 +3,7 @@ import {StyleSheet, View, Text} from 'react-native';
 import {Marker, Callout} from 'react-native-maps';
 import DataView from './dataview';
 
-export default CMarker = ({mLat, mLong, data}) => {
+export default CMarker = ({mLat, mLong, data, on}) => {
   let mref = null;
 
   function updateRef(ref) {
@@ -11,8 +11,10 @@ export default CMarker = ({mLat, mLong, data}) => {
   }
 
   useEffect(() => {
-    if (mref) {
+    if (mref && data.length > 0) {
       mref.showCallout();
+    } else {
+      mref.hideCallout();
     }
   });
 
@@ -22,12 +24,13 @@ export default CMarker = ({mLat, mLong, data}) => {
       coordinate={{
         latitude: mLat,
         longitude: mLong,
-      }}>
+      }}
+      onCalloutPress={on}>
       <View>
         <Text> </Text>
       </View>
       <Callout style={styles.data}>
-        <DataView data={data}></DataView>
+        <DataView data={data} full={false}></DataView>
       </Callout>
     </Marker>
   );
@@ -35,7 +38,6 @@ export default CMarker = ({mLat, mLong, data}) => {
 
 const styles = StyleSheet.create({
   data: {
-    width: 300,
-    height: 200,
+    width: 350,
   },
 });

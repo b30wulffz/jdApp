@@ -6,10 +6,13 @@ import {
   Text,
   BackHandler,
   CheckBox,
+  Modal,
+  TouchableHighlight,
 } from 'react-native';
 import MapView, {Marker, Callout} from 'react-native-maps';
 import Geolocation from 'react-native-geolocation-service';
 import CMarker from './Marker';
+import DataView from './dataview';
 
 const Data = require('./data.json');
 
@@ -97,9 +100,11 @@ export default class App extends React.Component {
       mLat: 37.78825,
       mLong: -122.4324,
       values: [],
+      dataVisible: false,
     };
     this.setup = this.setup.bind(this);
     this.updateRef = this.updateRef.bind(this);
+    this.setDataModal = this.setDataModal.bind(this);
   }
 
   setup({nativeEvent: {coordinate}}) {
@@ -166,6 +171,10 @@ export default class App extends React.Component {
     this.cref = re;
   }
 
+  setDataModal() {
+    this.setState({dataVisible: !this.state.dataVisible});
+  }
+
   render() {
     return (
       <View style={styles.mapFrame}>
@@ -176,9 +185,8 @@ export default class App extends React.Component {
           style={styles.map}
           initialRegion={this.region}
           maxZoomLevel={14}
-          minZoomLevel={7}
+          minZoomLevel={2}
           showsUserLocation={true}
-          showsMyLocationButton={true}
           onRegionChangeComplete={region => {
             this.region = region;
           }}
@@ -189,8 +197,36 @@ export default class App extends React.Component {
           <CMarker
             mLong={this.state.mLong}
             mLat={this.state.mLat}
-            data={this.state.values}></CMarker>
+            data={this.state.values}
+            on={this.setDataModal}></CMarker>
         </MapView>
+        <Modal visible={this.state.dataVisible} transparent={true}>
+          <View style={styles.modalBack}>
+            <DataView data={this.state.values} full={true}></DataView>
+            <TouchableHighlight
+              onPress={this.setDataModal}
+              style={{
+                marginTop: 20,
+                height: 40,
+                width: 70,
+                alignSelf: 'center',
+                backgroundColor: '#ffffff',
+                borderRadius: 10,
+              }}>
+              <Text
+                style={{
+                  fontWeight: '800',
+                  fontSize: 20,
+                  height: '100%',
+                  width: '100%',
+                  textAlign: 'center',
+                  textAlignVertical: 'center',
+                }}>
+                Close
+              </Text>
+            </TouchableHighlight>
+          </View>
+        </Modal>
         <View style={styles.check}>
           <View style={styles.checkbox}>
             <CheckBox
@@ -245,5 +281,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#ffffff',
+  },
+  modalBack: {
+    height: '100%',
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
 });

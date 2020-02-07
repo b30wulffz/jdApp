@@ -1,41 +1,46 @@
 import React from 'react';
 import {View, ScrollView, Text, StyleSheet} from 'react-native';
 
-export default DataView = ({data}) => {
+export default DataView = ({data, full}) => {
   return (
     <View style={styles.container}>
       <View style={styles.strip}>
         <Text style={styles.heading}>Banks and ATMs ({data.length})</Text>
       </View>
-      <ScrollView bounces={true} style={styles.scroll}>
-        {data.map(dt => {
-          return (
-            <View style={styles.list}>
-              <View style={styles.single}>
-                <Text style={styles.tag}>{dt.name}</Text>
-              </View>
-              <View style={styles.single}>
-                <Text style={styles.tag}>Address:</Text>
-                <Text style={styles.dt}>{dt.address}</Text>
-              </View>
-              <View style={styles.single}>
-                <Text style={styles.tag}>Timings:</Text>
-                <Text style={styles.dt}>{dt.timings}</Text>
-              </View>
+      {data.map((dt, index) => {
+        return full ? (
+          <View style={styles.list} key={index}>
+            <View style={styles.single}>
+              <Text style={styles.tag}>{dt.name}</Text>
             </View>
-          );
-        })}
-      </ScrollView>
+            <View style={styles.single}>
+              <Text style={styles.tag}>Address:</Text>
+              <Text style={styles.dt}>{dt.address}</Text>
+            </View>
+            <View style={styles.single}>
+              <Text style={styles.tag}>Timings:</Text>
+              <Text style={styles.dt}>{dt.timings}</Text>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.list} key={index}>
+            <View style={styles.single}>
+              <Text style={styles.tag}>{dt.name}</Text>
+            </View>
+          </View>
+        );
+      })}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    alignSelf: 'center',
     display: 'flex',
-    width: '100%',
-    height: '100%',
+    width: '90%',
     alignItems: 'center',
+    backgroundColor: '#ffffff',
   },
   strip: {
     width: '100%',
@@ -49,13 +54,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#ffffff',
   },
-  scroll: {
-    flex: 1,
-    width: '100%',
-  },
   list: {
     display: 'flex',
-    padding: 15,
+    padding: 5,
   },
   single: {
     display: 'flex',
@@ -66,10 +67,8 @@ const styles = StyleSheet.create({
   },
   tag: {
     fontSize: 20,
-    fontWeight: '800',
   },
   dt: {
     fontSize: 18,
-    fontWeight: '600',
   },
 });

@@ -1,0 +1,119 @@
+{
+  "bank": [
+    {
+      "name": "SBI, Sri City",
+      "latitude": 13.557658,
+      "longitude": 80.018456,
+      "ifsc": 794561,
+      "timings": "7:30AM-8:30PM",
+      "address": "Ramas Maske, Sri City"
+    },
+    {
+      "name": "ICICI, Sri City",
+      "latitude": 13.554304,
+      "longitude": 80.013216,
+      "ifsc": 794561,
+      "timings": "7:30AM-8:30PM",
+      "address": "89 Shs, Sri City"
+    },
+    {
+      "name": "Max Bank, Sri City",
+      "latitude": 13.554867,
+      "longitude": 80.014304,
+      "ifsc": 794321,
+      "timings": "7:30AM-8:30PM",
+      "address": "987 B, Sds, Sri City"
+    },
+    {
+      "name": "PNB, Sri City",
+      "latitude": 13.557842,
+      "longitude": 80.014008,
+      "ifsc": 989465,
+      "timings": "7:30AM-8:30PM",
+      "address": "8 Qas, Sri City"
+    },
+    {
+      "name": "Bank of Baroda,  Sri City",
+      "latitude": 13.561096,
+      "longitude": 80.023456,
+      "ifsc": 978952,
+      "timings": "7:30AM-8:30PM",
+      "address": "73 Pai, Sri City"
+    },
+    {
+      "name": "Bank of India, Sri City",
+      "latitude": 13.548663,
+      "longitude": 80.017959,
+      "ifsc": 951753,
+      "timings": "7:30AM-8:30PM",
+      "address": "Aapa Spsa, Sri City"
+    },
+    {
+      "name": "Axis Bank, Sri City",
+      "latitude": 13.549748,
+      "longitude": 80.004386,
+      "ifsc": 654123,
+      "timings": "7:30AM-8:30PM",
+      "address": "659 Ajz, Sri City"
+    }
+  ],
+
+  "atm": [
+    {
+      "name": "SBI ATM, Sri City",
+      "latitude": 13.549164,
+      "longitude": 80.004901,
+      "limit": "40000",
+      "timings": "7:30AM-8:30PM",
+      "address": "Ssdk Maske, Sri City"
+    },
+    {
+      "name": "ICICI ATM, Sri City",
+      "latitude": 13.552168,
+      "longitude": 80.008509,
+      "limit": "35000",
+      "timings": "7:30AM-8:30PM",
+      "address": "231 Shas, Sri City"
+    },
+    {
+      "name": "Max Bank ATM, Sri City",
+      "latitude": 13.559677,
+      "longitude": 80.021567,
+      "limit": "45000",
+      "timings": "7:30AM-8:30PM",
+      "address": "12 Aks, Sri City"
+    },
+    {
+      "name": "PNB ATM, Sri City",
+      "latitude": 13.557758,
+      "longitude": 80.014952,
+      "limit": "35000",
+      "timings": "7:30AM-8:30PM",
+      "address": "42 Wak, Sri City"
+    },
+    {
+      "name": "Bank of Baroda ATM,  Sri City",
+      "latitude": 13.549598,
+      "longitude": 80.003395,
+      "limit": "30000",
+      "timings": "7:30AM-8:30PM",
+      "address": "954 Srp, Sri City"
+    },
+    {
+      "name": "Bank of India ATM, Sri City",
+      "latitude": 13.562781,
+      "longitude": 80.025335,
+      "limit": "45000",
+      "timings": "7:30AM-8:30PM",
+      "address": "Eopa Wao, Sri City"
+    },
+    {
+      "name": "Axis Bank ATM, Sri City",
+      "latitude": 13.556106,
+      "longitude": 80.018033,
+      "limit": "50000",
+      "timings": "7:30AM-8:30PM",
+      "address": "59 Rpa, Sri City"
+    }
+  ]
+}
